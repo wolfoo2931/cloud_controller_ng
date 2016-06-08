@@ -37,7 +37,11 @@ module CloudController
       end
 
       def blob(key)
-        OpenStruct.new({ guid: key, public_download_url: @bits_client.download_url(@resource_type, key) })
+        OpenStruct.new({
+          guid: key,
+          public_download_url: @bits_client.download_url(@resource_type, key),
+          internal_download_url: @bits_client.internal_download_url(@resource_type, key)
+        })
       end
 
       def delete_blob(blob)

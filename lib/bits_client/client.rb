@@ -83,9 +83,14 @@ class BitsClient
   end
 
   def download_url(resource_type, guid)
-    resource_type = 'buildpack_cache/entries' if resource_type.to_sym == :buildpack_cache
+    File.join(public_endpoint.to_s, resource_path(resource_type, guid))
+  end
 
-    File.join(public_endpoint.to_s, resource_type.to_s, guid.to_s)
+  def internal_download_url(resource_type, guid)
+    head(resource_path(resource_type, guid)).tap do |response|
+      return response['location'] if response.code.to_i == 302
+    end
+    download_url(resource_type, guid)
   end
 
   def matches(resources_json)
@@ -110,6 +115,11 @@ class BitsClient
   private
 
   attr_reader :public_endpoint, :private_endpoint
+
+  def resource_path(resource_type, guid)
+    resource_type = 'buildpack_cache/entries' if resource_type.to_sym == :buildpack_cache
+    File.join('/', resource_type.to_s, guid.to_s)
+  end
 
   def validate_response_code!(expected, response)
     return if expected.to_i == response.code.to_i
@@ -138,6 +148,11 @@ class BitsClient
     return if File.exist?(file_path)
 
     raise Errors::FileDoesNotExist.new("Could not find file: #{file_path}")
+  end
+
+  def head(path)
+    request = Net::HTTP::Head.new(path)
+    do_request(request)
   end
 
   def get(path)
@@ -171,7 +186,8 @@ class BitsClient
 
   def do_request(request)
     request_id = SecureRandom.uuid
-    http_client = request.method == 'GET' ? public_http_client : private_http_client
+
+    http_client = ['GET', 'HEAD'].include?(request.method) ? public_http_client : private_http_client
 
     @logger.info('Request', {
       method: request.method,

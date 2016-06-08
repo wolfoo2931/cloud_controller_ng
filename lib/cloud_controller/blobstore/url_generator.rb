@@ -9,7 +9,7 @@ module CloudController
       include UrlGeneratorHelpers
       extend Forwardable
 
-      def initialize(blobstore_options, package_blobstore, buildpack_cache_blobstore, admin_buildpack_blobstore, droplet_blobstore, bits_client=nil)
+      def initialize(blobstore_options, package_blobstore, buildpack_cache_blobstore, admin_buildpack_blobstore, droplet_blobstore)
         @blobstore_options         = blobstore_options
         @package_blobstore         = package_blobstore
         @buildpack_cache_blobstore = buildpack_cache_blobstore
@@ -18,7 +18,6 @@ module CloudController
         @internal_url_generator    = InternalUrlGenerator.new(blobstore_options, package_blobstore, buildpack_cache_blobstore, admin_buildpack_blobstore, droplet_blobstore)
         @local_url_generator       = LocalUrlGenerator.new(blobstore_options, package_blobstore, buildpack_cache_blobstore, admin_buildpack_blobstore, droplet_blobstore)
         @upload_url_generator      = UploadUrlGenerator.new(blobstore_options)
-        @bits_client               = bits_client
       end
 
       def app_package_download_url(app)
@@ -38,8 +37,6 @@ module CloudController
       end
 
       def buildpack_cache_download_url(app)
-        return @bits_client.download_url(:buildpack_cache, app.buildpack_cache_key) if use_bits_service?
-
         if @buildpack_cache_blobstore.local?
           @local_url_generator.buildpack_cache_download_url(app)
         else
@@ -56,8 +53,6 @@ module CloudController
       end
 
       def admin_buildpack_download_url(buildpack)
-        return @bits_client.download_url(:buildpacks, buildpack.key) if use_bits_service?
-
         if @admin_buildpack_blobstore.local?
           @local_url_generator.admin_buildpack_download_url(buildpack)
         else
@@ -66,12 +61,6 @@ module CloudController
       end
 
       def droplet_download_url(app)
-        if use_bits_service?
-          droplet = app.current_droplet
-          return nil unless droplet && droplet.droplet_hash
-          return @bits_client.download_url(:droplets, droplet.droplet_hash)
-        end
-
         if @droplet_blobstore.local?
           @local_url_generator.droplet_download_url(app)
         else
@@ -80,8 +69,6 @@ module CloudController
       end
 
       def v3_droplet_download_url(droplet)
-        return @bits_client.download_url(:droplets, droplet.droplet_hash) if use_bits_service?
-
         if @droplet_blobstore.local?
           @local_url_generator.v3_droplet_download_url(droplet)
         else
@@ -100,12 +87,6 @@ module CloudController
         :package_droplet_upload_url,
         :v3_app_buildpack_cache_upload_url,
         :buildpack_cache_upload_url
-
-      private
-
-      def use_bits_service?
-        !!@bits_client
-      end
     end
   end
 end

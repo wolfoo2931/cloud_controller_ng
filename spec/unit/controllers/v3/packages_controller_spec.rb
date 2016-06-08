@@ -193,6 +193,7 @@ describe PackagesController, type: :controller do
         allow(CloudController::DependencyLocator.instance).to receive(:use_bits_client).and_return(true)
         allow(CloudController::DependencyLocator.instance).to receive(:bits_client).and_return(bits_client)
         allow(bits_client).to receive(:download_url).and_return('http://bits-service.com')
+        allow(bits_client).to receive(:internal_download_url).and_return('http://bits-service.service.cf.internal')
       end
 
       it 'redirects to the bits-service' do

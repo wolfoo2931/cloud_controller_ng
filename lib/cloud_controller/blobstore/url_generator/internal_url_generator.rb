@@ -15,8 +15,6 @@ module CloudController
 
       # Downloads
       def app_package_download_url(app)
-        return bits_client.download_url(:packages, app.package_hash) if bits_service_enabled?
-
         blob = @package_blobstore.blob(app.guid)
         return nil unless blob
 
@@ -54,8 +52,6 @@ module CloudController
 
       def v3_app_buildpack_cache_download_url(app_guid, stack)
         key = "#{app_guid}/#{stack}"
-        return bits_client.download_url(:buildpack_cache, key) if bits_service_enabled?
-
         blob = @buildpack_cache_blobstore.blob(key)
         return nil unless blob
 
@@ -63,8 +59,6 @@ module CloudController
       end
 
       def package_download_url(package)
-        return bits_client.download_url(:packages, package.package_hash) if bits_service_enabled?
-
         blob = @package_blobstore.blob(package.guid)
         return nil unless blob
 
@@ -82,14 +76,6 @@ module CloudController
 
       def logger
         @logger ||= Steno.logger('cc.blobstore.internal_url_generator')
-      end
-
-      def bits_client
-        @bits_client ||= CloudController::DependencyLocator.instance.bits_client
-      end
-
-      def bits_service_enabled?
-        !!bits_client
       end
     end
   end

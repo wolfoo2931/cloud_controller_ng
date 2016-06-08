@@ -158,51 +158,9 @@ describe CloudController::DependencyLocator do
           kind_of(CloudController::Blobstore::Client),
           kind_of(CloudController::Blobstore::Client),
           kind_of(CloudController::Blobstore::Client),
-          kind_of(CloudController::Blobstore::Client),
-          nil
+          kind_of(CloudController::Blobstore::Client)
         )
       locator.blobstore_url_generator
-    end
-
-    context 'when bits_service is enabled' do
-      let(:my_config) do
-        {
-          internal_service_hostname: internal_service_hostname,
-          external_host: 'external.host',
-          bits_service: {
-            enabled: true,
-            public_endpoint: 'https://bits-service.com',
-            private_endpoint: 'http://bits-service.service.cf.internal'
-          },
-          external_port: 8282,
-          staging: {
-            auth: {
-              user: 'username',
-              password: 'password',
-            }
-          }
-        }
-      end
-
-      it 'creates blobstore_url_generator with the internal_service_hostname, port, and blobstores' do
-        connection_options = {
-          blobstore_host: internal_service_hostname,
-          blobstore_port: 8282,
-          user: 'username',
-          password: 'password'
-        }
-
-        expect(CloudController::Blobstore::UrlGenerator).to receive(:new).
-          with(hash_including(connection_options),
-              kind_of(CloudController::Blobstore::Client),
-              kind_of(CloudController::Blobstore::Client),
-              kind_of(CloudController::Blobstore::Client),
-              kind_of(CloudController::Blobstore::Client),
-              kind_of(BitsClient)
-            )
-
-        locator.blobstore_url_generator
-      end
     end
   end
 

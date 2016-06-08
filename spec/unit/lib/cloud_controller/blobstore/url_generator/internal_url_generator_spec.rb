@@ -75,23 +75,6 @@ module CloudController
             expect(url_generator.app_package_download_url(app)).to be_nil
           end
         end
-
-        context 'when bits service is enabled' do
-          let(:bits_client) { double(BitsClient) }
-          let(:package_hash) { 'some-package' }
-          let(:app) { double(VCAP::CloudController::App, package_hash: package_hash) }
-          let(:url) { 'some-url' }
-
-          before do
-            allow_any_instance_of(CloudController::DependencyLocator).to receive(:bits_client).and_return(bits_client)
-            allow(bits_client).to receive(:download_url).with(:packages, app.package_hash).and_return(url)
-          end
-
-          it 'returns the url provided by the bits client' do
-            expect(bits_client).to receive(:download_url).with(:packages, app.package_hash)
-            expect(url_generator.app_package_download_url(app)).to eq(url)
-          end
-        end
       end
 
       describe '#buildpack_cache_download_url' do
@@ -240,20 +223,6 @@ module CloudController
               expect(url_generator.v3_app_buildpack_cache_download_url(app_model.guid, stack)).to be_nil
             end
           end
-
-          context 'when bits-service is enabled' do
-            let(:bits_client) { double(BitsClient) }
-            let(:url) { 'some-url' }
-
-            before do
-              allow_any_instance_of(CloudController::DependencyLocator).to receive(:bits_client).and_return(bits_client)
-              allow(bits_client).to receive(:download_url).with(:buildpack_cache, "#{app_model.guid}/#{stack}").and_return(url)
-            end
-
-            it 'provides bits-service download url' do
-              expect(url_generator.v3_app_buildpack_cache_download_url(app_model.guid, stack)).to eq(url)
-            end
-          end
         end
 
         describe '#package_download_url' do
@@ -279,22 +248,6 @@ module CloudController
 
             it 'returns nil' do
               expect(url_generator.package_download_url(app)).to be_nil
-            end
-          end
-
-          context 'when bits-service is enabled' do
-            let(:bits_client) { double(BitsClient) }
-            let(:package_hash) { 'some-package' }
-            let(:package) { double(VCAP::CloudController::PackageModel, package_hash: package_hash) }
-            let(:url) { 'some-url' }
-
-            before do
-              allow_any_instance_of(CloudController::DependencyLocator).to receive(:bits_client).and_return(bits_client)
-              allow(bits_client).to receive(:download_url).with(:packages, package.package_hash).and_return(url)
-            end
-
-            it 'provides bits-service download url' do
-              expect(url_generator.package_download_url(package)).to eq(url)
             end
           end
         end

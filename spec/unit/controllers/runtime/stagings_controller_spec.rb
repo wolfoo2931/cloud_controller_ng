@@ -708,6 +708,7 @@ module VCAP::CloudController
             end
 
             it 'redirects nginx to serve the bits service buildpack cache' do
+              stub_request(:head, %r{http://bits-service.com/buildpack_cache/entries/*/*}).to_return(status: 200)
               make_request
               expect(last_response.status).to eq(200)
               expect(last_response.headers['X-Accel-Redirect']).to match("/bits_redirect/http://bits-service.com/buildpack_cache/entries/#{app_obj.guid}/#{app_obj.stack.name}")
@@ -739,16 +740,17 @@ module VCAP::CloudController
                 },
                 bits_service: {
                   enabled: true,
-                  public_endpoint: 'https://bits-service.com',
+                  public_endpoint: 'http://bits-service.com',
                   private_endpoint: 'https://bits-service.service.cf.internal'
                 }
               })
             end
 
             it 'redirects to bits service' do
+              stub_request(:head, %r{http://bits-service.com/buildpack_cache/entries/*/*}).to_return(status: 200)
               make_request
               expect(last_response.status).to eq(302)
-              expect(last_response.headers['Location']).to match("https://bits-service.com/buildpack_cache/entries/#{app_obj.guid}/#{app_obj.stack.name}")
+              expect(last_response.headers['Location']).to match("http://bits-service.com/buildpack_cache/entries/#{app_obj.guid}/#{app_obj.stack.name}")
             end
           end
         end

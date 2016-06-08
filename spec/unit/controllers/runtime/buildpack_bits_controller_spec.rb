@@ -171,7 +171,7 @@ module VCAP::CloudController
             {
               bits_service: {
                 enabled: true,
-                public_endpoint: 'https://bits-service.example.com',
+                public_endpoint: 'http://bits-service.example.com',
                 private_endpoint: 'https://bits-service.service.cf.internal'
               }
             }
@@ -183,6 +183,7 @@ module VCAP::CloudController
             allow(CloudController::DependencyLocator.instance.upload_handler).to receive(:uploaded_file).and_return(valid_zip)
             allow(CloudController::DependencyLocator.instance.upload_handler).to receive(:uploaded_filename).and_return('buildpack.zip')
             allow_any_instance_of(BitsClient).to receive(:delete_buildpack)
+            stub_request(:head, "http://bits-service.example.com/buildpacks/#{test_buildpack.key}")
           end
 
           it 'still returns 201 on success' do

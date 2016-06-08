@@ -19,15 +19,13 @@ module CloudController
       let(:internal_url_generator) { instance_double(InternalUrlGenerator) }
       let(:local_url_generator) { instance_double(LocalUrlGenerator) }
       let(:upload_url_generator) { instance_double(UploadUrlGenerator) }
-      let(:bits_client) { nil }
 
       subject(:url_generator) do
         described_class.new(blobstore_options,
           package_blobstore,
           buildpack_cache_blobstore,
           admin_buildpack_blobstore,
-          droplet_blobstore,
-          bits_client)
+          droplet_blobstore)
       end
 
       before do
@@ -71,28 +69,6 @@ module CloudController
             url_generator.buildpack_cache_download_url(app)
             expect(internal_url_generator).to have_received(:buildpack_cache_download_url).with(app)
           end
-
-          context 'when bits-service is being used' do
-            let(:bits_client) { double(:bits_client) }
-            let(:cache_key) { SecureRandom.uuid }
-
-            before do
-              allow(app).to receive(:buildpack_cache_key).and_return(cache_key)
-            end
-
-            it 'calls bits_client for the download url' do
-              expect(bits_client).to receive(:download_url).with(:buildpack_cache, cache_key)
-              url_generator.buildpack_cache_download_url(app)
-            end
-
-            it 'returns the download_url from the bits_client' do
-              allow(bits_client).to receive(:download_url).
-                and_return('https://test.com/download-1')
-
-              expect(url_generator.buildpack_cache_download_url(app)).
-                to eq('https://test.com/download-1')
-            end
-          end
         end
 
         describe 'admin buildpacks' do
@@ -111,25 +87,6 @@ module CloudController
             url_generator.admin_buildpack_download_url(buildpack)
             expect(internal_url_generator).to have_received(:admin_buildpack_download_url).with(buildpack)
           end
-
-          context 'when bits-service is being used' do
-            let(:bits_client) { double(:bits_client) }
-
-            it 'calls bits_client for the download url' do
-              expect(bits_client).to receive(:download_url).
-                with(:buildpacks, buildpack.key)
-
-              url_generator.admin_buildpack_download_url(buildpack)
-            end
-
-            it 'returns the download_url from the bits_client' do
-              allow(bits_client).to receive(:download_url).
-                and_return('https://test.com/download-1')
-
-              expect(url_generator.admin_buildpack_download_url(buildpack)).
-                to eq('https://test.com/download-1')
-            end
-          end
         end
 
         describe 'download droplets' do
@@ -147,28 +104,6 @@ module CloudController
             allow(internal_url_generator).to receive(:droplet_download_url)
             url_generator.droplet_download_url(app)
             expect(internal_url_generator).to have_received(:droplet_download_url).with(app)
-          end
-
-          context 'when bits-service is being used' do
-            let(:bits_client) { double(:bits_client) }
-            let(:droplet) { double(:droplet, droplet_hash: 'abc') }
-
-            before do
-              allow(app).to receive(:current_droplet).and_return(droplet)
-            end
-
-            it 'calls bits_client for the download url' do
-              expect(bits_client).to receive(:download_url).with(:droplets, 'abc')
-              url_generator.droplet_download_url(app)
-            end
-
-            it 'returns the download_url from the bits_client' do
-              allow(bits_client).to receive(:download_url).
-                and_return('https://test.com/download-1')
-
-              expect(url_generator.droplet_download_url(app)).
-                to eq('https://test.com/download-1')
-            end
           end
         end
 
@@ -207,24 +142,6 @@ module CloudController
               allow(internal_url_generator).to receive(:v3_droplet_download_url)
               url_generator.v3_droplet_download_url(droplet)
               expect(internal_url_generator).to have_received(:v3_droplet_download_url).with(droplet)
-            end
-
-            context 'when bits-service is being used' do
-              let(:bits_client) { double(:bits_client) }
-              let(:droplet) { double(:droplet, droplet_hash: 'abc') }
-
-              it 'calls bits_client for the download url' do
-                expect(bits_client).to receive(:download_url).with(:droplets, 'abc')
-                url_generator.v3_droplet_download_url(droplet)
-              end
-
-              it 'returns the download_url from the bits_client' do
-                allow(bits_client).to receive(:download_url).
-                  and_return('https://test.com/download-1')
-
-                expect(url_generator.v3_droplet_download_url(droplet)).
-                  to eq('https://test.com/download-1')
-              end
             end
           end
 

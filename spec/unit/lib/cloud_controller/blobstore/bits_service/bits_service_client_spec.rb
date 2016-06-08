@@ -21,6 +21,7 @@ module CloudController
       describe '#blob' do
         before do
           allow(bits_client).to receive(:download_url).with(resource_type, key).and_return('the-correct-path')
+          allow(bits_client).to receive(:internal_download_url).with(resource_type, key).and_return('the-internal-url')
         end
 
         it 'returns the correct blob' do
@@ -28,6 +29,7 @@ module CloudController
 
           expect(blob.guid).to eq(key)
           expect(blob.public_download_url).to eq('the-correct-path')
+          expect(blob.internal_download_url).to eq('the-internal-url')
         end
       end
 
