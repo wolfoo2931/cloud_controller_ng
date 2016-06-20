@@ -774,7 +774,7 @@ RSpec.describe 'Apps' do
             'docker_credentials_json'    => {
               'redacted_message' => '[PRIVATE DATA HIDDEN]'
             },
-            'ports' => []
+            'ports' => [8080]
           }
         }
       )
