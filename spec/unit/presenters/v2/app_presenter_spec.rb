@@ -22,12 +22,11 @@ module CloudController::Presenters::V2
       let(:space) { VCAP::CloudController::Space.make }
       let(:stack) { VCAP::CloudController::Stack.make }
       let(:app) do
-        VCAP::CloudController::AppFactory.make(
+        a = VCAP::CloudController::AppFactory.make(
           name:                       'app-name',
           production:                 false,
           space:                      space,
           stack:                      stack,
-          buildpack:                  'http://some-buildpack.io',
           detected_buildpack:         'detected-buildpack',
           environment_json:           { 'key' => 'val' },
           memory:                     500,
@@ -48,6 +47,8 @@ module CloudController::Presenters::V2
           ports:                      [1234, 5678],
           package_hash:               'asdf'
         )
+        a.buildpack = 'http://some-buildpack.io'
+        a.save
       end
 
       before do
