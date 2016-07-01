@@ -129,12 +129,13 @@ module VCAP::CloudController::RestController
 
       validate_access(:index, associated_model, { related_obj: obj, related_model: model })
 
+      querier = associated_model == VCAP::CloudController::App ? AppQuery : Query
       filtered_dataset =
-        Query.filtered_dataset_from_query_params(
+        querier.filtered_dataset_from_query_params(
           associated_model,
           obj.user_visible_relationship_dataset(name,
-                                                VCAP::CloudController::SecurityContext.current_user,
-                                                SecurityContext.admin?),
+            VCAP::CloudController::SecurityContext.current_user,
+            SecurityContext.admin?),
           associated_controller.query_parameters,
           @opts
         )

@@ -35,11 +35,8 @@ module CloudController::Presenters::V2
           command:                    'start command',
           console:                    false,
           staging_task_id:            'staging-id',
-          package_state:              'STAGED',
           health_check_type:          'port',
           health_check_timeout:       50,
-          staging_failed_reason:      'StagerError',
-          staging_failed_description: 'staging-failed-description',
           diego:                      true,
           docker_image:               nil,
           enable_ssh:                 true,
@@ -47,8 +44,13 @@ module CloudController::Presenters::V2
           ports:                      [1234, 5678],
           package_hash:               'asdf'
         )
-        a.buildpack = 'http://some-buildpack.io'
-        a.save
+        a.app.lifecycle_data.update(buildpack: 'http://some-buildpack.io')
+        a.update(
+          package_state:              'STAGED',
+          staging_failed_reason:      'StagerError',
+          staging_failed_description: 'staging-failed-description',
+        )
+        a
       end
 
       before do

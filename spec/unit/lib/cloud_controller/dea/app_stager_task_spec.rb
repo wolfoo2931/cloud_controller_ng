@@ -208,7 +208,7 @@ module VCAP::CloudController
             let(:admin_buildpack) { Buildpack.make(name: 'buildpack-name') }
             let(:buildpack_key) { admin_buildpack.key }
             before do
-              app.buildpack = admin_buildpack.name
+              app.app.lifecycle_data.update(buildpack: admin_buildpack.name)
             end
 
             it 'saves the detected buildpack guid' do
@@ -688,7 +688,7 @@ module VCAP::CloudController
               let(:admin_buildpack) { Buildpack.make(name: 'buildpack-name') }
               let(:buildpack_key) { admin_buildpack.key }
               before do
-                app.buildpack = admin_buildpack.name
+                app.app.lifecycle_data.update(buildpack: admin_buildpack.name)
               end
 
               it 'saves the detected buildpack guid' do
